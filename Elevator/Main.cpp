@@ -7,16 +7,19 @@
 
 
 
+namespace Utils {
 
 
-void LOG(const std::string& message) {
+	void log(const std::string& message) {
 
-	std::cout << message << std::endl;
-}
+		std::cout << message << std::endl;
+	}
 
-void playAudio(const std::string& filePath) {
-	std::wstring widePath(filePath.begin(), filePath.end());
-	PlaySound(widePath.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+	void playAudio(const std::string& filePath) {
+		std::wstring widePath(filePath.begin(), filePath.end());
+		PlaySound(widePath.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+
+	}
 
 }
 
@@ -27,68 +30,67 @@ class Elevator {
 public:
 	 int floors = 20;
 	 int currentFloor = 6;
-	 int floorInput;
+	 int floorInput = 0;
 
 
 	 // this function will have the sole responsibility of incrementing current floor up. 
-	 void goUp(int& floorInput)
+	 void goUp()
 	 {
-		 LOG("Going up...");
+		 Utils::log("Going up...");
 		 for (; currentFloor != floorInput; currentFloor++) {
 
 
 			 //TODO: Gotta add the 4 second pause
 			 //TODO: Gotta add the beep
-			 playAudio(beep);
+			 Utils::playAudio(beep);
 			 std::cout << currentFloor << std::endl;
 			 std::this_thread::sleep_for(std::chrono::seconds(3));
 
 		 }
-		 playAudio(ding);
-		 LOG("Arrived at Floor " + std::to_string(currentFloor));
+		 Utils::playAudio(ding);
+		 Utils::log("Arrived at Floor " + std::to_string(currentFloor));
 
 	 } 
 	 // this function will have the sole responsibility of incrementing current floor down. 
 
-	 void goDown(int& floorInput)
+	 void goDown()
 	 {
-		 LOG("Going down...");
+		 Utils::log("Going down...");
 
 		 for (; currentFloor != floorInput; currentFloor--) {
-			 //TODO: Gotta add the 4 second pause
-			 //TODO: Gotta add the beep
-			 playAudio(beep);
+			
+			 Utils::playAudio(beep);
 			 std::cout << currentFloor << std::endl;
 			 std::this_thread::sleep_for(std::chrono::seconds(3));
 
 		 }
-		 playAudio(ding);
-		 LOG("Arrived at Floor " + std::to_string(currentFloor));
+		 Utils::playAudio(ding);
+		 Utils::log("Arrived at Floor " + std::to_string(currentFloor));
 	 }
 
-	 void upOrDown(int& floorInput, int& currentfloor) {
+	 void upOrDown() {
 		
-		 if (floorInput <= floors && floorInput > 0) {
+		 if (floorInput <= floors && floorInput > 0 && floorInput) {
 
 			 if (floorInput < currentFloor) {
 
-				 goDown(floorInput);
+				 goDown();
 			 }
 			 else if (floorInput > currentFloor) {
 
-				 goUp(floorInput);
+				 goUp();
 
 			 }
 			 else
 			 {
 
-				 LOG("That was fast. It's almost like we were already at the floor you requested");
+				 Utils::log("That was fast. It's almost like we were already at the floor you requested");
 
 			 }
 
 		 }
 		 else {
-			 LOG("You know you can't go there.");
+			 Utils::log("You know you can't go there.");
 
 
 		 }
@@ -103,10 +105,10 @@ public:
 };
 
 void cli(Elevator &el) {
-	playAudio(ding);
+	Utils::playAudio(ding);
 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	LOG("Door Opens");
-	LOG("Go inside? (Y/N)");
+	Utils::log("Door Opens");
+	Utils::log("Go inside? (Y/N)");
 	std::string goInside;
 	std::cin >> goInside;	// Communicate with user
 
@@ -114,27 +116,27 @@ void cli(Elevator &el) {
 	if (goInside == "Y" || goInside =="y") {
 
 
-		LOG("You walk in.");
+		Utils::log("You walk in.");
 		bool inside = true;
 
-		LOG("Door Closes");
-		LOG("Hello Human");
+		Utils::log("Door Closes");
+		Utils::log("Hello Human");
 
 		while (inside) {
 
 			// Ask to enter in the floor they want to goto
-			LOG("You are currently on Floor " + std::to_string(el.currentFloor));
-			LOG("What floor would you like to end our conversation with?");
+			Utils::log("You are currently on Floor " + std::to_string(el.currentFloor));
+			Utils::log("What floor would you like to end our conversation with?");
 			std::cin >> el.floorInput;
 
-			el.upOrDown(el.floorInput, el.currentFloor);
+			el.upOrDown();
 			
-			LOG("Would you like to exit?");
+			Utils::log("Would you like to exit?");
 			std::string goOutside;
 			std::cin >> goOutside;
 			if (goOutside == "Y" || goOutside == "y") {
 
-				LOG("Goodbye...");
+				Utils::log("Goodbye...");
 					inside = false;
 			}
 				
@@ -143,7 +145,7 @@ void cli(Elevator &el) {
 	}
 	else
 	{
-		LOG("Okay");
+		Utils::log("Okay");
 	}
 	//Should probably add in the floor number announcements here.
 
