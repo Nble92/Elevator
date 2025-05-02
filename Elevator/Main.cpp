@@ -1,3 +1,4 @@
+#define NOMINMAX // Prevents <windows.h> from defining min and max macros
 #include <iostream>
 #include <string>
 #include <thread>     // for std::this_thread::sleep_for
@@ -17,21 +18,23 @@ namespace Utils {
 
 	void playAudio(const std::string& filePath) {
 		std::wstring widePath(filePath.begin(), filePath.end());
-		PlaySound(widePath.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+		if (!PlaySound(widePath.c_str(), NULL, SND_FILENAME | SND_ASYNC)) {
+			log("Failed to play audio: " + filePath);
+			// Throw an error if audio can't be played
+		}
 
 	}
-
 }
 
-std::string ding = "ding.wav";
-std::string beep = "beep.wav";
+
 
 class Elevator {
 public:
 	 int floors = 20;
 	 int currentFloor = 6;
 	 int floorInput = 0;
-
+	 std::string ding = "ding.wav";
+	 std::string beep = "beep.wav";
 
 	 // this function will have the sole responsibility of incrementing current floor up. 
 	 void goUp()
@@ -105,7 +108,7 @@ public:
 };
 
 void cli(Elevator &el) {
-	Utils::playAudio(ding);
+	Utils::playAudio(el.ding);
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	Utils::log("Door Opens");
 	Utils::log("Go inside? (Y/N)");
@@ -127,7 +130,19 @@ void cli(Elevator &el) {
 			// Ask to enter in the floor they want to goto
 			Utils::log("You are currently on Floor " + std::to_string(el.currentFloor));
 			Utils::log("What floor would you like to end our conversation with?");
-			std::cin >> el.floorInput;
+			while (true) {
+				std::cin >> el.floorInput;
+
+				// Check if the input is valid
+				if (std::cin.fail()) {
+					std::cin.clear(); // Clear the error flag
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard invalid input
+					Utils::log("Invalid input. Please enter a valid floor number.");
+				}
+				else {
+					break; // Valid input
+				}
+			}
 
 			el.upOrDown();
 			
